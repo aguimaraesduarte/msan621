@@ -4,11 +4,11 @@ import pandas as pd
 import numpy as np
 import sys
 
-import time
-t = time.time()
+#import time
+#t = time.time()
 
 if len(sys.argv) == 1:
-	print "Need test stations.\nex: python A1_Normals.py USW00023234 USW00014918"
+	print "Need test stations.\nex: python A1_Normals_SLR.py USW00023234 USW00014918"
 	sys.exit()
 else:
 	test_IDs = sys.argv[1:]
@@ -82,8 +82,16 @@ meanPerDayPerHour_test = list(test.groupby(['Month','Day','Hour'])['Temp'].mean(
 
 # mean that day up to but not including current hour
 # note: for H00, the temp is set as that particular temp, since no previous value exists for that day
-runningMean_train = [temp for runningMeanPerDayPerStation in [[np.mean(train['Temp'].values[i:(i + end)]) if end > 0 else train['Temp'][i] for end in range(24)] for i in range(0, len(train), 24)] for temp in runningMeanPerDayPerStation]
-runningMean_test = [temp for runningMeanPerDayPerStation in [[np.mean(test['Temp'].values[i:(i + end)]) if end > 0 else test['Temp'][i] for end in range(24)] for i in range(0, len(test), 24)] for temp in runningMeanPerDayPerStation]
+runningMean_train = []
+runningMean_test = []
+runningMeanPerDayPerStation_train = [[np.mean(train['Temp'].values[i:(i + end)]) if end > 0 else train['Temp'].values[i] for end in range(24)] for i in range(0, len(train), 24)]
+runningMeanPerDayPerStation_test = [[np.mean(test['Temp'].values[i:(i + end)]) if end > 0 else test['Temp'].values[i] for end in range(24)] for i in range(0, len(test), 24)]
+for l in runningMeanPerDayPerStation_train:
+	for val in l:
+		runningMean_train.append(val)
+for l in runningMeanPerDayPerStation_test:
+	for val in l:
+		runningMean_test.append(val)
 
 #print "Feature 4 calculated."
 
@@ -101,3 +109,5 @@ algo.fit(train_x, train_y)
 hypotheses = algo.predict(test_x)
 
 print "MSE: %.3f" % metrics.mean_squared_error(test_y, hypotheses)
+
+#print time.time()-t
