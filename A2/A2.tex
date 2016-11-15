@@ -1,0 +1,147 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{listings}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{framed}
+\usepackage{graphicx,grffile}
+\usepackage{multirow}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{MSAN 621 - Homework 2}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{Andre Guimaraes Duarte}
+  \preauthor{\centering\large\emph}
+  \postauthor{\par}
+  \predate{\centering\large\emph}
+  \postdate{\par}
+  \date{November 10, 2016}
+  
+% Redefines (sub)paragraphs to behave more like section*s
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+\usepackage{color}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\maketitle
+
+For this assignment, we implemented four different machine learning classification algorithms:
+
+\begin{itemize}
+  \item Logistic Regression
+  \item Linear Discriminant Analysis
+  \item Quadratic Discriminant Analysis
+  \item k Nearest Neighbors
+\end{itemize}
+
+Here, the data set comprises of a certain number of tweets, as well as their description based on sentiment analysis: one of \{negative, neutral, positive\} according to the perceived sentiment of the text in the tweet. 
+
+In order to implement said machine learning algorithms, we first need to create a set of features for each tweet. The objective is to predict the sentiment based on these features. Performance of the classification is assessed by the misclassification rate (lower is better).
+
+\textbf{Feature 1}
+
+The first feature is the rates of 20 English "function words": \{"I", "the", "and", "to", "a", "of", "that", "in", "it", "my", "is", "you", "was", "for", "have", "with", "he", "me", "on", "but"\}.
+
+There are 20 words that we are interested in. So this feature accounts for 20 columns in our feature space: each column represents the rate of said word in the tweet.
+
+\textbf{Feature 2}
+
+The second feature is the rates of 3 punctuation symbols: \{".", ",", "!"\}
+
+There are 3 punctuation symbols that we are interested in. So this feature accounts for 3 columns in our feature space: each column represents the rate of said punctuation symbol in the tweet.
+
+\textbf{Basline model}
+
+Taking these two features, we can create our baseline model. We achieved the following baseline misclassification rates (1 minus cross-validation scores):
+
+\begin{itemize}
+  \item Logistic Regression: 0.36 $\pm$ 0.01
+  \item Linear Discriminant Analysis: 0.36 $\pm$ 0.01
+  \item Quadratic Discriminant Analysis: 0.50 $\pm$ 0.14
+  \item k Nearest Neighbors: 0.41 $\pm$ 0.03
+\end{itemize}
+
+\textbf{Additional features}
+
+In order to try to improve the accuracy of the algorithms, we can try to add additional features. We have to be careful with overfitting though. 
+
+The extra features added here were:
+
+\begin{itemize}
+  \item the rate of occurrence of the 1000 most common words/tokens used in the training set
+  \item the total length of the tweet in number of words/tokens
+  \item the rate of occurrence of a short list of common positive/negative words (such as \textit{awesome, great, fantastic, horrible, terrible...})
+\end{itemize}
+
+\textbf{Improvement (or worsening) over the baseline}
+
+By adding these extra features, we obtained (on the same train and test sets), the following scores:
+
+\begin{itemize}
+  \item Logistic Regression: 0.31 $\pm$ 0.02
+  \item Linear Discriminant Analysis: 0.27 $\pm$ 0.02
+  \item Quadratic Discriminant Analysis: 0.54 $\pm$ 0.16
+  \item k Nearest Neighbors: 0.41 $\pm$ 0.02
+\end{itemize}
+
+We can see that the accuracy improved significantly for Logistic Regression and LDA. For QDA and kNN, the accuracy either improved little or even got worse. This can be explained by overfitting. Since boundaries can be non-linear for these last two algorithms, there is a higher chance of overfitting, and it seems like this is what happened for this specific test and train sets. We can see that linear bounds are less prone to this behavior, as seen by the significant improvement in accuracy for the first two algorithms.
+
+
+\textbf{Best classfier}
+
+From these results, it seems that LDA and Logistic Regression perform better than the other two classification algorithms. As explained previously, this is due to the fact that non-linear classification methods are more susceptible to overfitting, which may be what happened here. Indeed, we can see that the variability in the CV score for QDA is especially high, meaning that changing the train and validation sets changes the result significantly.
+
+In general, LDA was the best classifier here, and it saw an improvement of around 25\% over the baseline by adding extra features.
+
+
+\textbf{Further explorations}
+
+To improve the performance of the model, we could imagine using a TFIDF algorithm to find the relative importance of words in a tweet, and classify those as \textit{positive, neutral, negative}. Each tweet would be equivalent, in this case, to a document. This would possibly be faster and more reliable than the approach used in this exercise.
+
+\textbf{Running the code}
+To run the code, use the following syntax:
+
+\texttt{python misclassification.py "<train-data.csv>" "<test-data.csv>" <algorithm> <number of neighbors for knn (optional)>}
+
+where \texttt{<algorithm>} is one of \texttt{\{logit, lda, qda, knn\}}.
+
+\end{document}
